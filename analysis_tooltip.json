@@ -1,0 +1,8 @@
+{
+	"Entity Recognition and Masking": "It determines which entities—persons, places, organizations, dates, addresses, etc.—are mentioned in a text",
+	"Important Sentence": "Identifies relevant sentences having more impact.",
+	"Important Lemmas":"Shows the phrases deemed particularly representative during the analysis.",
+	"Important Phrases":"Shows the phrases deemed particularly representative during the analysis.",
+	"Relation Analysis": "Relation extraction is a type of document analysis that labels concepts expressed in the text with their semantic role.",
+	"Sentiment Analysis":"Sentiment analysis is a type of document analysis that determines how positive or negative the tone of the text is."
+}
