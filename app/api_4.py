@@ -1,13 +1,13 @@
 import streamlit as st
 from weasyprint import HTML
 
-from utils import fetch_classification_response
-from utils import category_df
-from utils import show_corpus
-from utils import load_colors
-from utils import highlight_tags
-from utils import beutify_html
-from utils import download_file
+from app.utils import fetch_classification_response
+from app.utils import category_df
+from app.utils import show_corpus
+from app.utils import load_colors
+from app.utils import highlight_tags
+from app.utils import beutify_html
+from app.utils import download_file
 
 
 def document_tagging(client, corpus, style, tooltip_dict, filename, language):

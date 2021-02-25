@@ -7,6 +7,10 @@ import uuid
 import re
 import lxml.html as LH
 from pyquery import PyQuery 
+from io import StringIO
+import docx2txt
+import pdfplumber
+import langid
 
 @st.cache
 def load_credential():
@@ -33,7 +37,7 @@ def header():
 
 @st.cache
 def load_corpus():
-	with open('corpus.json') as f:
+	with open('asset/corpus.json') as f:
 		return json.load(f)
 
 @st.cache
@@ -41,7 +45,7 @@ def load_tooltip():
 	'''
 	Function load tooltip from json file.
 	'''
-	with open('analysis_tooltip.json') as f:
+	with open('asset/analysis_tooltip.json') as f:
 		return json.load(f)
 
 @st.cache
@@ -49,7 +53,7 @@ def load_colors():
 	'''
 	Function to load colors from json file, which used in all visualisations.
 	'''
-	with open('color.json') as f:
+	with open('asset/color.json') as f:
 		return json.load(f)
 
 @st.cache
@@ -57,7 +61,7 @@ def load_language():
 	'''
 	Function to load languages from json file, this is used in try it page.
 	'''
-	with open('language.json') as f:
+	with open('asset/language.json') as f:
 		return json.load(f)
 
 
@@ -520,3 +524,41 @@ def generate_sentiment_results(df, df2, sentence, overall_score, positive_score,
 
 		html2 += '</div>'
 	return html, html2	
+
+@st.cache
+def read_text_flie(doc_obj):
+
+	bytes_data = doc_obj.read()
+
+	encoding='utf-8'
+	s=str(bytes_data,encoding)
+
+	all_line = ""
+
+	data = StringIO(s)
+	for line in data:
+        	all_line+= line
+
+	return all_line
+
+@st.cache
+def read_pdf(doc_obj):
+	try:
+		with pdfplumber.open(doc_obj) as pdf:
+			all_pages = pdf.pages
+
+		page_count = len(pdf.pages)
+		print('len of pdf ',page_count)
+		all_page_text = ""
+		for i in range(page_count):
+			page = pdf.pages[i]
+			all_page_text+=page.extract_text()
+		
+		return all_page_text
+		
+	except:
+		st.write("None")
+
+@st.cache
+def check_language(text):
+	return langid.classify(text)[0]

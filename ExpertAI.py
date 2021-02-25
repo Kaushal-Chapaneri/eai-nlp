@@ -1,19 +1,23 @@
 import streamlit as st
 from expertai.nlapi.cloud.client import ExpertAiClient
+import docx2txt
 
-from utils import header
-from utils import set_credential
-from utils import load_corpus
-from utils import beutify_html
-from utils import load_tooltip
-from utils import load_language
+from app.utils import header
+from app.utils import set_credential
+from app.utils import load_corpus
+from app.utils import beutify_html
+from app.utils import load_tooltip
+from app.utils import load_language
+from app.utils import read_text_flie
+from app.utils import read_pdf
+from app.utils import check_language
 
-from api_1 import enitiy_recognition
-from api_2 import important_sentences
-from api_2 import important_lemmas_phrses
-from api_3 import relation_identification
-from api_4 import document_tagging
-from api_5 import sentiment_analysis
+from app.api_1 import enitiy_recognition
+from app.api_2 import important_sentences
+from app.api_2 import important_lemmas_phrses
+from app.api_3 import relation_identification
+from app.api_4 import document_tagging
+from app.api_5 import sentiment_analysis
 
 page = st.sidebar.selectbox("Select a page", ["Overview", "Application", "Try It"])
 
@@ -36,7 +40,7 @@ if page == "Overview":
 	a4 = "<p style='text-align: justify;font-size:20px;'>Watch below video to get most out of this application.</p><br>"
 	st.markdown(a4,unsafe_allow_html=True)
 
-	st.video("https://www.youtube.com/watch?v=xlu4yVPZ_Uc")
+	st.video("https://www.youtube.com/watch?v=KfqswuV11dY")
 
 elif page == "Application":
 
@@ -90,49 +94,81 @@ elif page == "Try It":
 	st.write("")
 	languages = load_language()
 
-	st.write("Select Language")
-	language_option = st.selectbox("",tuple(languages.keys()))
-	language_option = languages[language_option]
-	st.markdown("""<h3 style='color: black;'><a id="top">Input Corpus</a></h3>""", unsafe_allow_html=True)
-
-	input_text = st.text_area('',height=150)
 	set_credential()
 	client = ExpertAiClient()
 	tooltip = load_tooltip()
+
+	st.write("Select Language")
+	language_option = st.selectbox("",tuple(languages.keys()))
+	language_option = languages[language_option]
 	st.write(" ")
+
+	text = None
+
+	page3 = st.sidebar.selectbox("Select Input type", ["File Upload", "Text input"])
+
+	if page3 == "File Upload":
+
+		uploaded_file = st.file_uploader("Upload a corpus file (supported format .txt .docx and .pdf)")
+
+		if uploaded_file:
+
+			if uploaded_file.type == "text/plain":
+				text = read_text_flie(uploaded_file)
+
+			elif uploaded_file.type == "application/pdf":
+				text = read_pdf(uploaded_file)
+
+			elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+				text = docx2txt.process(uploaded_file)
+
+			else:
+				st.error('Supported formats are .txt .docx and .pdf') 
 	
-	if input_text:
-		st.markdown("""<h3 style='color: black;'><a id="top">Corpus</a></h3>""", unsafe_allow_html=True)
-		style = "<style>mark.entity { display: inline-block }</style>"
+	elif page3 == "Text input":
+
+		st.markdown("""<h3 style='color: black;'><a id="top">Input Corpus</a></h3>""", unsafe_allow_html=True)
 		
-		page2 = st.sidebar.selectbox("Select Analysis Type", ["Entity Recognition", "Important Sentence", "Important Lemmas / Phrases",
-		"Relation Identification", "Document Tagging / Classification", "Sentiment Analysis"])
+		input_text = st.text_area('',height=150)
+
+		text = input_text
 		
-		if page2 == "Entity Recognition":
+	if text:
 
-			enitiy_recognition(client, input_text, style, "try_it", tooltip, language_option)
-		
-		elif page2 == "Important Sentence":
+		if check_language(text) != language_option:
+			st.error("Selected language and corpus language does not match.")
+		else:
+			st.markdown("""<h3 style='color: black;'><a id="top">Corpus</a></h3>""", unsafe_allow_html=True)
+			style = "<style>mark.entity { display: inline-block }</style>"
+			
+			page2 = st.sidebar.selectbox("Select Analysis Type", ["Entity Recognition", "Important Sentence", "Important Lemmas / Phrases",
+			"Relation Identification", "Document Tagging / Classification", "Sentiment Analysis"])
+			
+			if page2 == "Entity Recognition":
 
-			important_sentences(client, input_text, style, "try_it", tooltip, language_option)
+				enitiy_recognition(client, text, style, "try_it", tooltip, language_option)
+			
+			elif page2 == "Important Sentence":
 
-		elif page2 == "Important Lemmas / Phrases":
+				important_sentences(client, text, style, "try_it", tooltip, language_option)
 
-			important_lemmas_phrses(client, input_text, style, "try_it", tooltip, language_option)
+			elif page2 == "Important Lemmas / Phrases":
 
-		elif page2 == "Relation Identification":
+				important_lemmas_phrses(client, text, style, "try_it", tooltip, language_option)
 
-			relation_identification(client, input_text, style, tooltip, language_option)
+			elif page2 == "Relation Identification":
 
-		elif page2 == "Document Tagging / Classification":
+				relation_identification(client, text, style, tooltip, language_option)
 
-			document_tagging(client, input_text, style, tooltip, "try_it", language_option)
-		
-		elif page2 == "Sentiment Analysis":
+			elif page2 == "Document Tagging / Classification":
 
-			sentiment_analysis(client, input_text, style, tooltip, "try_it", language_option)
+				document_tagging(client, text, style, tooltip, "try_it", language_option)
+			
+			elif page2 == "Sentiment Analysis":
 
-		st.write("")
-		st.write("")
-		href = f"""<a href="#top">Back to top</a>"""
-		st.markdown(href,unsafe_allow_html=True)	
+				sentiment_analysis(client, text, style, tooltip, "try_it", language_option)
+
+			st.write("")
+			st.write("")
+			href = f"""<a href="#top">Back to top</a>"""
+			st.markdown(href,unsafe_allow_html=True)	

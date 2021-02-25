@@ -1,10 +1,9 @@
 import streamlit as st
 from streamlit_agraph import agraph, TripleStore, Node, Edge, Config
-import json
 
-from utils import fetch_response
-from utils import show_corpus
-from utils import tooltip
+from app.utils import fetch_response
+from app.utils import show_corpus
+from app.utils import tooltip
 
 def relation_identification(client, corpus, style, tooltip_dict, language):
     '''
@@ -49,4 +48,7 @@ def relation_identification(client, corpus, style, tooltip_dict, language):
         st.write("API used to get these results [docs](https://docs.expert.ai/nlapi/latest/guide/relation-extraction/)")
 
     except Exception as e:
-        st.warning("There's no relation in input sentence.")
+        if e.args[0].split(':')[-1] == ' 413':
+            st.warning("Free tier does not support processing large corpus.")
+        else:
+            st.warning("There's no relation in input sentence.")

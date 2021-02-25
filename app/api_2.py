@@ -1,14 +1,13 @@
 import streamlit as st
 from weasyprint import HTML
-import json
 
-from utils import download_file
-from utils import beutify_html
-from utils import get_important_sentence
-from utils import get_important_words
-from utils import fetch_response
-from utils import show_corpus
-from utils import tooltip
+from app.utils import download_file
+from app.utils import beutify_html
+from app.utils import get_important_sentence
+from app.utils import get_important_words
+from app.utils import fetch_response
+from app.utils import show_corpus
+from app.utils import tooltip
 
 def important_sentences(client, corpus, style, filename, tooltip_dict, language):
     '''
@@ -80,7 +79,10 @@ def important_lemmas_phrses(client, corpus, style, filename, tooltip_dict, langu
             st.write(" ")
         
         except Exception as e:
-            st.warning("There's no important lemmas in input sentence.")
+            if e.args[0].split(':')[-1] == ' 413':
+                st.warning("Free tier does not support processing large corpus.")
+            else:
+                st.warning("There's no important lemmas in input sentence.")
 
     if document['_main_phrases']:
 
@@ -107,4 +109,7 @@ def important_lemmas_phrses(client, corpus, style, filename, tooltip_dict, langu
             st.write("API used to get these results [docs](https://docs.expert.ai/nlapi/latest/guide/keyphrase-extraction/)")
         
         except Exception as e:
-            st.warning("There's no important Phrases in input sentence.")
+            if e.args[0].split(':')[-1] == ' 413':
+                st.warning("Free tier does not support processing large corpus.")
+            else:
+                st.warning("There's no important Phrases in input sentence.")

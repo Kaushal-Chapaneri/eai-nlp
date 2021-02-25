@@ -1,15 +1,14 @@
 import streamlit as st
 from weasyprint import HTML
-import json
 
-from utils import to_df
-from utils import to_html
-from utils import mask_tag
-from utils import download_file
-from utils import beutify_html
-from utils import fetch_response
-from utils import show_corpus
-from utils import tooltip
+from app.utils import to_df
+from app.utils import to_html
+from app.utils import mask_tag
+from app.utils import download_file
+from app.utils import beutify_html
+from app.utils import fetch_response
+from app.utils import show_corpus
+from app.utils import tooltip
 
 
 def enitiy_recognition(client, corpus, style, filename, tooltip_dict, language):
@@ -47,4 +46,8 @@ def enitiy_recognition(client, corpus, style, filename, tooltip_dict, language):
         st.write("API used to get these results [docs](https://docs.expert.ai/nlapi/latest/guide/entity-recognition/)")
     
     except Exception as e:
-        st.warning("There's no entity in input sentence.")
+
+        if e.args[0].split(':')[-1] == ' 413':
+                st.warning("Free tier does not support processing large corpus.")
+        else:
+                st.warning("There's no entity in input sentence.")

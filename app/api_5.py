@@ -1,15 +1,14 @@
 import streamlit as st
 from weasyprint import HTML
-import json
 
-from utils import fetch_response
-from utils import show_corpus
-from utils import tooltip
-from utils import category_df
-from utils import generate_sentiment_df
-from utils import generate_sentiment_results
-from utils import download_file
-from utils import beutify_html
+from app.utils import fetch_response
+from app.utils import show_corpus
+from app.utils import tooltip
+from app.utils import category_df
+from app.utils import generate_sentiment_df
+from app.utils import generate_sentiment_results
+from app.utils import download_file
+from app.utils import beutify_html
 
 def sentiment_analysis(client, corpus, style, tooltip_dict, filename, language):
     '''
@@ -72,4 +71,7 @@ def sentiment_analysis(client, corpus, style, tooltip_dict, filename, language):
         st.write("API used to get these results [docs](https://docs.expert.ai/nlapi/latest/guide/sentiment-analysis/) and [docs](https://docs.expert.ai/nlapi/latest/guide/keyphrase-extraction/)")
 
     except Exception as e:
-        st.warning("No sentiment found in input sentence.")
+        if e.args[0].split(':')[-1] == ' 413':
+            st.warning("Free tier does not support processing large corpus.")
+        else:
+            st.warning("No sentiment found in input sentence.")
